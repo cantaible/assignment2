@@ -52,20 +52,28 @@ def conv_forward_strides(x, w, b, conv_param):
     # Pad the input
     p = pad
     x_padded = np.pad(x, ((0, 0), (0, 0), (p, p), (p, p)), mode='constant')
+    #对输入进行padding填充，x的第一轴为num，第二维是通道数，所以这两个不用填充
+
 
     # Figure out output dimensions
     H += 2 * pad
+    
     W += 2 * pad
     out_h = (H - HH) // stride + 1
     out_w = (W - WW) // stride + 1
+    #计算最后输出的数据尺寸
 
     # Perform an im2col operation by picking clever strides
     shape = (C, HH, WW, N, out_h, out_w)
+    #输入图像的chennel数，卷积核的长，卷积核的宽，输入图片的数量，卷积后的长，卷积后的宽
     strides = (H * W, W, 1, C * H * W, stride * W, stride)
+    #输入图像的像素数，输入图像的宽，1，输入图像的总尺寸，包括深度，步长*宽度，步长
     strides = x.itemsize * np.array(strides)
+    #x.itemsize为数组x所占的字节数
     x_stride = np.lib.stride_tricks.as_strided(x_padded,
                   shape=shape, strides=strides)
     x_cols = np.ascontiguousarray(x_stride)
+    #返回内存中的连续数组
     x_cols.shape = (C * HH * WW, N * out_h * out_w)
 
     # Now all our convolutions are a big matrix multiply

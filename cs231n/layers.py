@@ -25,7 +25,8 @@ def affine_forward(x, w, b):
     # TODO: Implement the affine forward pass. Store the result in out. You   #
     # will need to reshape the input into rows.                               #
     ###########################################################################
-    pass
+    x_reshape=np.reshape(x,(x.shape[0],-1))#(N, D)
+    out=np.dot(x_reshape,w)+b#(N, D)*(D,M)=(N,M)
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -54,7 +55,11 @@ def affine_backward(dout, cache):
     ###########################################################################
     # TODO: Implement the affine backward pass.                               #
     ###########################################################################
-    pass
+    dx=np.dot(dout,w.T)#(N, M)*(M,D)=(N, D)
+    dx=np.reshape(dx,x.shape)#(N, d_1, ... d_k)
+    x_reshape=np.reshape(x,(x.shape[0],-1))#(N, D)
+    dw=np.dot(x_reshape.T,dout)#(N, D)*(N, M)=(D, M)
+    db=np.sum(dout,axis=0,keepdims=False)#(N, M)->(M,)不保留矩阵的二维特性
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -76,7 +81,7 @@ def relu_forward(x):
     ###########################################################################
     # TODO: Implement the ReLU forward pass.                                  #
     ###########################################################################
-    pass
+    out=np.maximum(x,0)
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -99,7 +104,10 @@ def relu_backward(dout, cache):
     ###########################################################################
     # TODO: Implement the ReLU backward pass.                                 #
     ###########################################################################
-    pass
+    #x大于0则dx=1，否则为0
+    #dout是上游传下来的梯度，
+    dx=dout
+    dx[x<=0]=0
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -118,6 +126,7 @@ def batchnorm_forward(x, gamma, beta, bn_param):
 
     At each timestep we update the running averages for mean and variance using
     an exponential decay based on the momentum parameter:
+    在每次传播时，我们使用指数衰减更新动量参数？？
 
     running_mean = momentum * running_mean + (1 - momentum) * sample_mean
     running_var = momentum * running_var + (1 - momentum) * sample_var
@@ -450,7 +459,18 @@ def conv_forward_naive(x, w, b, conv_param):
     # TODO: Implement the convolutional forward pass.                         #
     # Hint: you can use the function np.pad for padding.                      #
     ###########################################################################
-    pass
+    N, C, H, W=x.shape
+    F, _, HH, WW=w.shape
+    stride=conv_param['stride']
+    pad=conv_param['pad']
+    H_out = 1 + (H + 2 * pad - HH) / stride
+    W_out = 1 + (W + 2 * pad - WW) / stride
+    
+    for i in range(H_out):
+        for j in range(W_out):
+            #H_cov=H_out*stride:H_out*stride+1+HH
+            #W_cov=W_out*stride:W_out*stride+1+WW
+            out[i][j]=np.dot(x[H_out*stride:H_out*stride+1+HH,W_out*stride:W_out*stride+1+WW])
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -475,7 +495,7 @@ def conv_backward_naive(dout, cache):
     ###########################################################################
     # TODO: Implement the convolutional backward pass.                        #
     ###########################################################################
-    pass
+    
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
